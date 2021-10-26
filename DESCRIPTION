@@ -1,0 +1,30 @@
+Package: akflow
+Title: Analyze Sag River Water Flow Data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "McCrea",
+           family = "Cobb",
+           role = c("aut", "cre"),
+           email = "mccrea_cobb@fws.gov")
+Description: Functions for importing, formating, summarizing, and visualizing 
+    daily water flow data for the Sag River, Alaska. Functions for testing for 
+    differences in flow rates between time periods using Kruskal Wallis and 
+    Dunn's tests. 
+License: `use_mit_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports:
+    bookdown,
+    data.table,
+    dplyr,
+    dunn.test,
+    ggplot2,
+    kableExtra,
+    magrittr,
+    reshape,
+    zoo,
+    plyr,
+    rmarkdown,
+    doBy

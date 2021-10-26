@@ -1,0 +1,182 @@
+---
+title: "Sag River Water Flow Analysis"
+subtitle: |
+  | Inventory and Monitoring Program
+  | Alaska Region
+author: "McCrea Cobb"
+date: '`r Sys.Date()`'
+abstract: |
+  Our objective was to determine whether monthly flow rates on the Sagavanirktok 
+  (Sag) River in 2008-2012 differed from monthly flow rates in 1996-2007 and 
+  2013-2020. Based on a Kruskal-Wallis test, we found that median flow rates differed 
+  among the three time periods. Using Dunn's tests, we found no evidence for differences 
+  in median monthly flow rates between 2008-2012 and 1996-2007 for eight 
+  months out of the year. Conversely, median monthly flow rates were 
+  significantly lower in 2008-2012 than 2013-2020 during all months. These differences
+  were most pronounced during the winter and early seasons (Dec-Apr).
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+---
+
+
+```{r setup, eval=TRUE, include = FALSE}
+knitr::opts_chunk$set(eval = TRUE, echo = FALSE)
+
+# Required libraries
+library(tidyverse)
+library(kableExtra)
+```
+
+
+```{r load-data, include = FALSE}
+
+# Import the flow data
+dat <- akflow::import_format()
+
+# Create a list containing summary tables and figures
+summaries <- akflow::summarize_flows(dat = dat$daily)
+```
+
+
+\newpage
+
+# Backgound
+
+## Principal Investigator
+Cathy Flanagan (cathleen_flanagan@fws.gov)
+
+## Association
+Water Resources Branch
+
+## Type of Request
+Data analysis  
+
+## Project Objective
+Determine whether monthly flow rates for the Sagavanirktok (Sag) River between 2008-2012 differ significantly from monthly flow rates between 1996-2007 and 2013-2020.  
+
+## Project Description
+FWS Refuge Water Resources (Alaska) has 4.5 years of daily water flow data for the Canning River that spans 2008-2012. They want to use these data to determine the instream flow (ISF) needs for the system. Since this period may be seeing the effects of climate change, they would like to look at a longer record from a neaby river, the Sagavanirktok (Sag), to determine if period of data from the Canning River years differ statically from the majority of the record. Since they use monthly periods to determine ISF recommendations, they would like to determine if monthly flows during the 2008-2012 period differ from the prior years (1996-2007) or following years (2013-2020). The analysis was originally completed in 2016. This is an update of the original report, using additional data available from 2016-2020.   
+
+## PRIMR Number
+NA  
+
+\newpage
+
+# Methods
+
+The USGS maintains water flow data for the Sag River. We extracted these daily flow data from the USGS data repository [here](https://waterdata.usgs.gov/nwis/inventory/?site_no=15908000) and reformatted these data for analyses (01_import_format.R in the Appendix). Then, we generated summary statistics, plots and tables to summarize the data (02_summarize_data.R in the Appendix).   
+
+```{r summary-data, echo=FALSE, results="hide"}
+
+sum <- dat$daily %>%
+  dplyr::group_by(Period) %>%
+  dplyr::summarize(mean = mean(DA),
+                   sd = sd(DA))
+```
+
+The overall average daily flow was `r round(mean(dat$daily$DA), 2)` ft^3^/min and ranged from `r round(min(dat$daily$DA), 2)` to `r format(round(max(dat$daily$DA), 2), scientific = FALSE)`. First we examined the daily flow data with a line plot. Daily flow rates cycled seasonally, with peak flows varying among years (Figure \@ref(fig:line-plot)). The mean flow rate was `r round(sum$mean[1], 2)` (SD = `r round(sum$sd[1], 2)`) ft^3^/min in `r sum$Period[1]`, `r round(sum$mean[2], 2)` (SD = `r round(sum$sd[2], 2)`) ft^3^/min in `r sum$Period[2]`, and `r round(sum$mean[3], 2)` (SD = `r round(sum$sd[3], 2)`) ft^3^/min in `r sum$Period[3]`.
+
+```{r line-plot, echo = FALSE, warning=FALSE, fig.cap="Flow Rates for the Sag River, Alaska (1996-2020)."}
+
+summaries$plot_daily
+```
+
+To visually examine the distribution of the monthly flow data, we grouped the data by month and created a boxplot of flow rates for each of the three periods (Figure \@ref(fig:monthly-boxplot)). A visual inspection of this plot pointed out that monthly flow data were skewed, with outlying large values, but the overall shape of the distributions appeared similar across the year. Most notably, median flow rates were higher during the summer months during 2013-2015 compared to the other two periods (Table \@ref(tab:summary-stats)).
+
+```{r monthly-boxplot, echo=FALSE, fig.cap="Boxplot of daily flows for the Sag River, Alaska, grouped by month, between 1996-2007, 2008-2012, and 2013-2020."}
+
+summaries$boxplot_monthly
+```
+
+
+```{r summary-stats, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Summary statistics of daily water flow rates for the Sag River, Alaska."}
+
+summaries$tbl_byperiod[3:7] <- round(summaries$tbl_byperiod[3:7], 2)
+kableExtra::kable(summaries$tbl_byperiod, 
+                booktabs = T, 
+                format = "latex",
+                caption = "Summary statistics of daily water flow rates 
+                for the Sag River, Alaska.")
+```
+
+Daily flow data were not normally distributed within each month, so we used a nonparametric Kruskal-Wallis test (KW test) to test for differences in median monthly flow samples among time periods. The KW test assumes independence of observations in each group and between groups and that flows from each time period originated from the same distribution, but it does not assume normality of data. Following a rejection of the null hypothesis of the KW test (i.e., there is evidence for differences among time periods), we used a Dunn's tests with a Bonferroni corrections to conduct pairwise comparisons between pairs of time periods for each month. The null hypothesis for each pairwise comparison was that the probability of observing a randomly selected value from the first period that is larger than a randomly selected value from the second group is 0.5 (essentially a test for a difference in the median value). 
+
+
+# Results and Discussion
+
+```{r, echo = FALSE, results='hide', warning=FALSE}
+
+# Run the Kruskal Wallis and Dunn's tests
+kwdunns <- kw_dunns(dat$daily)
+```
+
+Based on the results of the initial KW test, we rejected the null hypothesis and concluded that median monthly flow differed among the three time periods (Kruskal-Wallis chi-squared = `r round(kwdunns$kw$statistic, 2)`, p-value $\le$ 0.001).
+
+Pairwise comparisons of flow rates using Dunn's tests provided evidence of differences between monthly flow rates between time periods (Table \@ref(tab:dunns-tbl)). When comparing monthly differences in flow rates between 2008-2012 and the earlier period (1996-2007), we found evidence for differences in water flows only during May, August, October and November. Alternatively, we found consistent strong evidence that median flow rates were significantly lower in 2008-2012 and 1996-2007 than the most recent period (2013-2020) during all months of the year (p < 0.001). Although median flow rates increased in 2013-2020 during all months, these increases were most pronounced during the winter and early spring seasons (Dec-Apr), based on a cursory comparison of z-scores.
+
+```{r dunns-tbl, echo = FALSE, warning = FALSE}
+
+d <- kwdunns$dunns %>%
+  mutate("z-score" = as.character(round(Z, 3)),
+         "p-value" = as.character(round(P.adjusted, 3)))
+d[d == "0"] <- "<0.001"
+
+d$merged <- stringr::str_c(d$`z-score`, " (", d$`p-value`, ")")
+
+d <- d %>%
+  select(Month, comparisons, merged) %>%
+  reshape(idvar = "Month", 
+          timevar = "comparisons",
+          direction = "wide") %>%
+  dplyr::rename("1996-2007 - 2008-2012" = 2,
+                "1996-2007 - 2013-2020"= 3,
+                "2008-2012 - 2013-2020" = 4) %>%
+  dplyr::mutate(Month = month.abb[as.numeric(Month)],
+         "2008-2012 - 2013-2020" = kableExtra::cell_spec(`2008-2012 - 2013-2020`, 
+                                                         "latex", 
+                                                         color = "red", 
+                                                         bold = T),
+         "1996-2007 - 2013-2020" = kableExtra::cell_spec(`1996-2007 - 2013-2020`, 
+                                                         "latex", 
+                                                         color = "red", 
+                                                         bold = T),
+         "1996-2007 - 2008-2012" = ifelse(row_number() == c(5, 8), 
+                                          kableExtra::cell_spec(`1996-2007 - 2008-2012`, 
+                                                                "latex", 
+                                                                color = "red", 
+                                                                bold = T), 
+                                          `1996-2007 - 2008-2012`))
+
+d[5, 2] <- paste0("\\textcolor{red}{\\textbf{", d[5, 2],"}}")
+d[8, 2] <- paste0("\\textcolor{red}{\\textbf{", d[8, 2],"}}")
+d[10, 2] <- paste0("\\textcolor{red}{\\textbf{", d[10, 2],"}}")
+d[11, 2] <- paste0("\\textcolor{red}{\\textbf{", d[11, 2],"}}")
+
+d %>% kableExtra::kable(booktabs = T, 
+                        format = "latex",
+                        escape = F,
+                        caption = "Z-scores (p-values) from the Dunn's Test comparing 
+                  water flow between each time period, Sag River, Alaska. 
+                  Statistically significant values (p=<0.05) are in red.")
+```
+
+
+\newpage 
+
+
+# Appendix
+
+## 01-import_format.R
+```{r, code = readLines("../01_import_format.R"), echo=TRUE, eval=FALSE}
+```
+
+## 02_summarize_data.R
+```{r, code = readLines("../02_summarize_data.R"), echo=TRUE, eval=FALSE}
+```
+
+## 03_analysis-kw_dunns.R
+```{r, code = readLines("../03_analysis-kw_dunns.R"), echo=TRUE, eval=FALSE}
+```
