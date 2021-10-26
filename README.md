@@ -1,7 +1,6 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![Build Status](https://travis-ci.com/USFWS/escapement.png)](https://travis-ci.com/USFWS/escapement)
 
-# skflow
+# akflow
 An R package that includes functions for importing, formating, summarizing, and visualizing daily water flow data for the Sag River, Alaska. Functions for testing for differences in flow rates between time periods using Kruskal Wallis and Dunn's tests.
 
 # USFWS Disclaimer
