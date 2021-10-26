@@ -8,7 +8,7 @@ The United States Fish and Wildlife Service (FWS) GitHub project code is provide
 
 # Instructions
 
-install.packages("devtools")
-library(devtools)
-devtools::install_github("mccrea-cobb/akflow")
-aktools::run_report()
+`install.packages("devtools")`
+`library(devtools)`
+`devtools::install_github("mccrea-cobb/akflow")`
+`aktools::run_report()`
