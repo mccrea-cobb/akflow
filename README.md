@@ -12,4 +12,4 @@ The United States Fish and Wildlife Service (FWS) GitHub project code is provide
 `library(devtools)`  
 `devtools::install_github("mccrea-cobb/akflow")`  
 `library(akflow)`  
-`aktools::run_report()`  
+`akflow::run_report()`  
